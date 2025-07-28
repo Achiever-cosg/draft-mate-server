@@ -1,4 +1,13 @@
 export default async function handler(req, res) {
+  // Set CORS headers for all requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method === 'GET') {
     return res.status(200).json({
       success: true,
@@ -12,7 +21,7 @@ export default async function handler(req, res) {
 
   const COHERE_API_KEY = process.env.COHERE_API_KEY;
 
-  const prompt = `Please write a smart, human-like reply mail to this email in a professional tone. 
+  const prompt = `Please write a smart, human-like 'reply mail to this' email in a professional tone. 
 Keep it in not more than 3 short paragraphs. 
 Avoids adding any boilerplate or extra lines after the sign-off (like links, disclaimers, or taglines`;
 
