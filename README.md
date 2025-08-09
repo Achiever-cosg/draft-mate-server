@@ -1,2 +1,2 @@
-# Draftmate Server
-Server for DraftMate - Samrt Email AI Extension
+# DraftMailAI Server
+Server for DraftMailAI - Email writing AI Extension

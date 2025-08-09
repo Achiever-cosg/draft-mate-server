@@ -1,5 +1,5 @@
 {
-  "name": "draftmate-server",
+  "name": "draftmailAI-server",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",

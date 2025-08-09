@@ -1,3 +1,7 @@
+
+const API_KEY = process.env.GEMINI_API_KEY;
+const MODEL_NAME = process.env.MODEL_NAME;
+
 export default async function handler(req, res) {
   // Set CORS headers for all requests
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,11 +23,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const COHERE_API_KEY = process.env.COHERE_API_KEY;
-
-  const prompt = `Please write a smart, human-like 'reply mail to this' email in a professional tone. 
-Keep it in not more than 3 short paragraphs. 
-Avoids adding any boilerplate or extra lines after the sign-off (like links, disclaimers, or taglines`;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+  const prompt = "Draft an email reply in a formal and respectful business tone. Do not include a subject line. Disregard all footers, disclaimers, and unsubscribe links from the original email.";
 
   const { emailContent } = req.body;
 
@@ -31,30 +32,45 @@ Avoids adding any boilerplate or extra lines after the sign-off (like links, dis
     return res.status(400).json({ error: 'Missing emailContent in request body' });
   }
 
+  const requestBody = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `${prompt}: \n\n${emailContent}`,
+          },
+        ],
+      },
+    ],
+  };
+
+  // console.log("API call started...");
+
   try {
-    const response = await fetch("https://api.cohere.ai/v1/generate", {
+    const response = await fetch(`${API_URL}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${COHERE_API_KEY}`
       },
-      body: JSON.stringify({
-        model: "command",
-        prompt: `${prompt}: \n\n${emailContent}`,
-        max_tokens: 3000,
-        temperature: 0.7
-      })
+      body: JSON.stringify(requestBody),
     });
 
+    // console.log("API call completed: ", response.status);
+
     if (!response.ok) {
-      const err = await response.text();
-      return res.status(response.status).json({ error: err });
+      const err = await response.json();
+      console.error('Response not OK:', error);
+      return res.status(response.status).json({ error: 'error' });
     }
 
     const data = await response.json();
+    const generatedText = data.candidates[0].content.parts[0].text;
+    // console.log("generated data: ", generatedText);
+
     return res.status(200).json(data);
+
   } catch (error) {
-    console.error('Cohere proxy error:', error);
+    console.error('ProxyServer fetch error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
